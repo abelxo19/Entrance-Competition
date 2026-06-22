@@ -3,13 +3,13 @@ import {
   ArrowRight,
   BookOpenCheck,
   CheckCircle2,
-  GraduationCap,
   LockKeyhole,
   Mail,
   ShieldCheck,
   Trophy,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   requestPasswordReset,
@@ -50,8 +50,15 @@ export default async function LoginPage({ searchParams }: AuthPageProps) {
     <main className="min-h-screen bg-[#f3f6fa] dark:bg-background">
       <header className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 font-bold">
-          <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GraduationCap className="size-5" aria-hidden="true" />
+          <span className="flex size-10 items-center justify-center overflow-hidden rounded-md bg-white">
+            <Image
+              src="/alpha-tutor-mark.png"
+              alt=""
+              width={40}
+              height={40}
+              className="size-10 object-contain"
+              priority
+            />
           </span>
           <span className="text-lg text-primary">
             Alpha<span className="font-medium text-foreground">Tutor</span>
