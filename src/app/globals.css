@@ -9,7 +9,7 @@
   --card-foreground: oklch(0.174 0.006 286);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.174 0.006 286);
-  --primary: #4f46e5;
+  --primary: #142b4b;
   --primary-foreground: #ffffff;
   --secondary: #10b981;
   --secondary-foreground: #052e22;
@@ -21,8 +21,8 @@
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.89 0.011 286);
   --input: oklch(0.89 0.011 286);
-  --ring: #4f46e5;
-  --chart-1: #4f46e5;
+  --ring: #142b4b;
+  --chart-1: #142b4b;
   --chart-2: #10b981;
   --chart-3: #f59e0b;
   --chart-4: oklch(0.52 0.02 286);
@@ -37,7 +37,7 @@
   --card-foreground: oklch(0.985 0.004 286);
   --popover: oklch(0.19 0.008 286);
   --popover-foreground: oklch(0.985 0.004 286);
-  --primary: #4f46e5;
+  --primary: #466b9b;
   --primary-foreground: #ffffff;
   --secondary: #10b981;
   --secondary-foreground: #042f22;
@@ -49,7 +49,7 @@
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.31 0.012 286);
   --input: oklch(0.31 0.012 286);
-  --ring: #818cf8;
+  --ring: #7f9fc9;
 }
 
 @theme inline {

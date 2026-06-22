@@ -3,9 +3,9 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "EthioEntrance | Grade 12 Exam Preparation",
+  title: "Alpha Tutor | The Matric Survival Hub",
   description:
-    "A premium Ethiopian Grade 12 University Entrance Examination preparation platform.",
+    "High-yield Grade 12 summaries, formula sheets, subject preparation, and Ethiopia's National Mock Championship.",
 };
 
 export default function RootLayout({
