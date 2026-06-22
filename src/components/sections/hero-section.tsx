@@ -36,7 +36,7 @@ export function HeroSection() {
         >
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1.5 text-sm font-semibold text-primary shadow-sm">
             <Trophy className="size-4 text-accent" aria-hidden="true" />
-            National Mock Championship · 10,000 ETB Prize
+            National Mock Championship · 5,000 ETB Prize
           </div>
           <p className="mb-3 text-sm font-bold uppercase text-secondary">
             The Ultimate Matric Survival Hub

@@ -43,7 +43,7 @@ const vaultItems = [
   {
     icon: Medal,
     title: "National Mock Championship",
-    amharic: "የ10,000 ብር የሽልማት ፈተና",
+    amharic: "የ5,000 ብር የሽልማት ፈተና",
     description:
       "A realistic digital Matric simulation with an active timer, question navigator, and auto-save.",
   },
@@ -53,12 +53,12 @@ const tracks = [
   {
     icon: FlaskConical,
     title: "Natural Science",
-    subjects: ["English", "Mathematics", "SAT", "Biology", "Chemistry", "Physics"],
+    subjects: ["English", "Mathematics", "Biology", "Chemistry", "Physics"],
   },
   {
     icon: Network,
     title: "Social Science",
-    subjects: ["English", "Mathematics", "SAT", "History", "Economics", "Geography"],
+    subjects: ["English", "Mathematics", "History", "Economics", "Geography"],
   },
 ];
 
