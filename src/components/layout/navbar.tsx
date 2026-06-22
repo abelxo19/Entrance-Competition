@@ -40,7 +40,7 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link href="/exams">
+              <Link href="/auth/login?next=/exams">
                 Enter Portal
                 <ArrowRight aria-hidden="true" />
               </Link>
@@ -72,7 +72,10 @@ export function Navbar() {
               </Link>
             ))}
             <Button asChild className="mt-2 w-full">
-              <Link href="/exams" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/auth/login?next=/exams"
+                onClick={() => setIsOpen(false)}
+              >
                 Enter Portal
                 <ArrowRight aria-hidden="true" />
               </Link>

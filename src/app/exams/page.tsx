@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { PortalUserMenu } from "@/components/auth/portal-user-menu";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { Input } from "@/components/ui/input";
@@ -12,20 +13,38 @@ import {
 import { ExamCard } from "@/features/catalog/exam-card";
 import { SubjectCard } from "@/features/catalog/subject-card";
 import { exams, subjects } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
 
-export default function ExamsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ExamsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const fullName =
+    typeof user?.user_metadata.full_name === "string"
+      ? user.user_metadata.full_name
+      : undefined;
+
   return (
     <>
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 max-w-3xl">
-          <p className="text-sm font-semibold text-primary">Exam Catalog</p>
-          <h1 className="mt-2 text-4xl font-bold tracking-normal">
-            Find the right practice session for today.
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Filter by grade, year, difficulty, and subject to keep preparation precise.
-          </p>
+        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold text-primary">Student Portal</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-normal">
+              Welcome back{fullName ? `, ${fullName.split(" ")[0]}` : ""}.
+            </h1>
+            <p className="mt-3 text-muted-foreground">
+              Choose an exam, continue your preparation, and keep building your score.
+            </p>
+          </div>
+          <PortalUserMenu
+            email={user?.email}
+            fullName={fullName}
+          />
         </div>
 
         <section className="mb-8 rounded-lg border bg-card p-4" aria-label="Exam filters">
