@@ -2,7 +2,10 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  getSiteUrl,
+  isSupabaseConfigured,
+} from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 function value(formData: FormData, key: string) {
@@ -47,7 +50,8 @@ export async function signUp(formData: FormData) {
   const password = value(formData, "password");
   const next = safeNext(formData);
   const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin") ?? "http://localhost:3000";
+  const origin =
+    getSiteUrl() ?? requestHeaders.get("origin") ?? "http://localhost:3000";
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -80,7 +84,8 @@ export async function requestPasswordReset(formData: FormData) {
 
   const email = value(formData, "email");
   const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin") ?? "http://localhost:3000";
+  const origin =
+    getSiteUrl() ?? requestHeaders.get("origin") ?? "http://localhost:3000";
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
