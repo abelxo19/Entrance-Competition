@@ -27,10 +27,16 @@ for select
 to authenticated
 using (user_id = auth.uid());
 
-drop function if exists public.register_device_session(text, text, text);
 drop function if exists public.register_device_session(jsonb);
+drop function if exists public.register_device_session(text, text, text);
 
-create or replace function public.register_device_session(payload jsonb)
+-- Parameter order matches PostgREST alphabetical lookup:
+-- (p_device_label, p_session_id, p_user_agent)
+create or replace function public.register_device_session(
+  p_device_label text,
+  p_session_id text,
+  p_user_agent text default null
+)
 returns jsonb
 language plpgsql
 security definer
@@ -38,9 +44,9 @@ set search_path = ''
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_session_id text := nullif(trim(payload->>'session_id'), '');
-  v_device_label text := coalesce(nullif(trim(payload->>'device_label'), ''), 'Unknown device');
-  v_user_agent text := payload->>'user_agent';
+  v_session_id text := nullif(trim(p_session_id), '');
+  v_device_label text := coalesce(nullif(trim(p_device_label), ''), 'Unknown device');
+  v_user_agent text := p_user_agent;
   v_active_count integer;
   v_max_devices constant integer := 2;
 begin
@@ -167,12 +173,12 @@ begin
 end;
 $$;
 
-revoke all on function public.register_device_session(jsonb) from public;
+revoke all on function public.register_device_session(text, text, text) from public;
 revoke all on function public.revoke_device_session(text) from public;
 revoke all on function public.is_device_session_active(text) from public;
 revoke all on function public.clear_user_device_sessions() from public;
 
-grant execute on function public.register_device_session(jsonb) to authenticated;
+grant execute on function public.register_device_session(text, text, text) to authenticated;
 grant execute on function public.revoke_device_session(text) to authenticated;
 grant execute on function public.is_device_session_active(text) to authenticated;
 grant execute on function public.clear_user_device_sessions() to authenticated;

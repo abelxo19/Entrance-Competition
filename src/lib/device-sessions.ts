@@ -115,11 +115,9 @@ export async function registerCurrentDeviceSession(
   const deviceLabel = getDeviceLabel(resolvedUserAgent);
 
   const { data, error } = await supabase.rpc("register_device_session", {
-    payload: {
-      session_id: sessionId,
-      device_label: deviceLabel,
-      user_agent: resolvedUserAgent,
-    },
+    p_device_label: deviceLabel,
+    p_session_id: sessionId,
+    p_user_agent: resolvedUserAgent,
   });
 
   if (error) {
