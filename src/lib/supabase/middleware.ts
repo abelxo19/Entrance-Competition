@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
   const { data: claimsData } = await supabase.auth.getClaims();
   const isAuthenticated = Boolean(claimsData?.claims);
 
-  if (isAuthenticated && isProtectedPath(pathname)) {
+  if (isAuthenticated) {
     const deviceSession = await ensureCurrentDeviceSession(
       supabase,
       request.headers.get("user-agent"),
@@ -66,7 +66,9 @@ export async function updateSession(request: NextRequest) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/auth/login";
       loginUrl.searchParams.set("error", deviceSession.error);
-      loginUrl.searchParams.set("next", pathname);
+      if (isProtectedPath(pathname)) {
+        loginUrl.searchParams.set("next", pathname);
+      }
       return NextResponse.redirect(loginUrl);
     }
   }

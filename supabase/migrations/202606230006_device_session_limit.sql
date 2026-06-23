@@ -1,6 +1,6 @@
 -- Limit each account to 2 active device sessions.
 
-create table if not exists public.user_device_sessions (
+create table public.user_device_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   session_id text not null unique,
@@ -11,30 +11,24 @@ create table if not exists public.user_device_sessions (
   revoked_at timestamptz
 );
 
-create index if not exists user_device_sessions_user_id_idx
+create index user_device_sessions_user_id_idx
   on public.user_device_sessions(user_id);
 
-create index if not exists user_device_sessions_active_user_idx
+create index user_device_sessions_active_user_idx
   on public.user_device_sessions(user_id)
   where revoked_at is null;
 
 alter table public.user_device_sessions enable row level security;
 
-drop policy if exists "Users can read their own device sessions" on public.user_device_sessions;
 create policy "Users can read their own device sessions"
 on public.user_device_sessions
 for select
 to authenticated
 using (user_id = auth.uid());
 
-drop function if exists public.register_device_session(jsonb);
-drop function if exists public.register_device_session(text, text, text);
-
--- Parameter order matches PostgREST alphabetical lookup:
--- (p_device_label, p_session_id, p_user_agent)
 create or replace function public.register_device_session(
-  p_device_label text,
   p_session_id text,
+  p_device_label text default 'Unknown device',
   p_user_agent text default null
 )
 returns jsonb
@@ -44,13 +38,10 @@ set search_path = ''
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_session_id text := nullif(trim(p_session_id), '');
-  v_device_label text := coalesce(nullif(trim(p_device_label), ''), 'Unknown device');
-  v_user_agent text := p_user_agent;
   v_active_count integer;
   v_max_devices constant integer := 2;
 begin
-  if v_user_id is null or v_session_id is null then
+  if v_user_id is null or p_session_id is null or length(trim(p_session_id)) = 0 then
     return jsonb_build_object('ok', false, 'error', 'Not authenticated');
   end if;
 
@@ -58,33 +49,15 @@ begin
     select 1
     from public.user_device_sessions
     where user_id = v_user_id
-      and session_id = v_session_id
+      and session_id = p_session_id
       and revoked_at is null
   ) then
     update public.user_device_sessions
     set last_seen_at = now(),
-        device_label = v_device_label,
-        user_agent = coalesce(v_user_agent, user_agent)
+        device_label = coalesce(nullif(trim(p_device_label), ''), device_label),
+        user_agent = coalesce(p_user_agent, user_agent)
     where user_id = v_user_id
-      and session_id = v_session_id;
-
-    return jsonb_build_object('ok', true);
-  end if;
-
-  if exists (
-    select 1
-    from public.user_device_sessions
-    where user_id = v_user_id
-      and session_id = v_session_id
-      and revoked_at is not null
-  ) then
-    update public.user_device_sessions
-    set revoked_at = null,
-        last_seen_at = now(),
-        device_label = v_device_label,
-        user_agent = coalesce(v_user_agent, user_agent)
-    where user_id = v_user_id
-      and session_id = v_session_id;
+      and session_id = p_session_id;
 
     return jsonb_build_object('ok', true);
   end if;
@@ -109,9 +82,9 @@ begin
   )
   values (
     v_user_id,
-    v_session_id,
-    v_device_label,
-    v_user_agent
+    p_session_id,
+    coalesce(nullif(trim(p_device_label), ''), 'Unknown device'),
+    p_user_agent
   );
 
   return jsonb_build_object('ok', true);
@@ -125,7 +98,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  if auth.uid() is null or p_session_id is null or length(trim(p_session_id)) = 0 then
+  if auth.uid() is null or p_session_id is null then
     return;
   end if;
 
@@ -154,32 +127,10 @@ as $$
   );
 $$;
 
-create or replace function public.clear_user_device_sessions()
-returns void
-language plpgsql
-security definer
-set search_path = ''
-as $$
-begin
-  if auth.uid() is null then
-    return;
-  end if;
-
-  update public.user_device_sessions
-  set revoked_at = now(),
-      last_seen_at = now()
-  where user_id = auth.uid()
-    and revoked_at is null;
-end;
-$$;
-
 revoke all on function public.register_device_session(text, text, text) from public;
 revoke all on function public.revoke_device_session(text) from public;
 revoke all on function public.is_device_session_active(text) from public;
-revoke all on function public.clear_user_device_sessions() from public;
 
 grant execute on function public.register_device_session(text, text, text) to authenticated;
 grant execute on function public.revoke_device_session(text) to authenticated;
 grant execute on function public.is_device_session_active(text) to authenticated;
-grant execute on function public.clear_user_device_sessions() to authenticated;
-
