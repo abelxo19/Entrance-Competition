@@ -6,6 +6,7 @@ import {
   getSiteUrl,
   isSupabaseConfigured,
 } from "@/lib/supabase/config";
+import { registerCurrentDeviceSession, revokeCurrentDeviceSession } from "@/lib/device-sessions";
 import { createClient } from "@/lib/supabase/server";
 
 function value(formData: FormData, key: string) {
@@ -35,6 +36,12 @@ export async function signIn(formData: FormData) {
 
   if (error) {
     authRedirect({ mode: "signin", next, error: error.message });
+  }
+
+  const deviceSession = await registerCurrentDeviceSession(supabase);
+  if (!deviceSession.ok) {
+    await supabase.auth.signOut();
+    authRedirect({ mode: "signin", next, error: deviceSession.error });
   }
 
   redirect(next);
@@ -67,6 +74,12 @@ export async function signUp(formData: FormData) {
   }
 
   if (data.session) {
+    const deviceSession = await registerCurrentDeviceSession(supabase);
+    if (!deviceSession.ok) {
+      await supabase.auth.signOut();
+      authRedirect({ mode: "register", next, error: deviceSession.error });
+    }
+
     redirect(next);
   }
 
@@ -116,6 +129,7 @@ export async function updatePassword(formData: FormData) {
 export async function signOut() {
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
+    await revokeCurrentDeviceSession(supabase);
     await supabase.auth.signOut();
   }
 

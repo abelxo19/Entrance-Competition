@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { ensureCurrentDeviceSession } from "@/lib/device-sessions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,6 +17,21 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      const deviceSession = await ensureCurrentDeviceSession(
+        supabase,
+        request.headers.get("user-agent"),
+      );
+
+      if (!deviceSession.ok) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(
+          new URL(
+            `/auth/login?error=${encodeURIComponent(deviceSession.error)}`,
+            request.url,
+          ),
+        );
+      }
+
       return NextResponse.redirect(new URL(next, request.url));
     }
   }
