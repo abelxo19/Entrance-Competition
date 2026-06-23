@@ -129,8 +129,8 @@ function SubjectCollectionCard({ subject }: { subject: Subject }) {
           </span>
         </div>
         <Button asChild variant="outline" className="mt-5 w-full">
-          <Link href="/exam/demo-2015">
-            Open {subject.name}
+          <Link href={`/subjects/${subject.id}`}>
+            View {subject.name} Notes
             <ArrowRight aria-hidden="true" />
           </Link>
         </Button>

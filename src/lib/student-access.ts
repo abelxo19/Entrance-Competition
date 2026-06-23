@@ -83,3 +83,30 @@ export async function requireApprovedStudent() {
     };
   };
 }
+
+/**
+ * Requires the user to be an admin
+ * Redirects to home if not authenticated or not admin
+ */
+export async function requireAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth/login?next=/admin");
+  }
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error || profile?.role !== "admin") {
+    redirect("/");
+  }
+
+  return user;
+}

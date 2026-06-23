@@ -44,3 +44,15 @@ export interface SubjectResult {
   total: number;
   trend: "up" | "steady" | "down";
 }
+
+export interface SubjectNote {
+  id: string;
+  subject_id: string;
+  title: string;
+  summary?: string;
+  file_path: string; // Path in storage
+  file_size?: number;
+  order_by: number;
+  created_at: string;
+  updated_at: string;
+}
