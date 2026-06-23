@@ -7,8 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PerformanceCard } from "@/features/results/performance-card";
 import { ResultsChart } from "@/features/results/results-chart";
 import { results } from "@/lib/data";
+import { requireApprovedStudent } from "@/lib/student-access";
 
-export default function ResultsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ResultsPage() {
+  await requireApprovedStudent();
   const totalScore = results.reduce((sum, item) => sum + item.score, 0);
   const totalPossible = results.reduce((sum, item) => sum + item.total, 0);
   const percent = Math.round((totalScore / totalPossible) * 100);

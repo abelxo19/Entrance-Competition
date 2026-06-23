@@ -1,31 +1,41 @@
-import { Search } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  FileText,
+  FlaskConical,
+  Network,
+  Trophy,
+} from "lucide-react";
+import Link from "next/link";
 import { PortalUserMenu } from "@/components/auth/portal-user-menu";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ExamCard } from "@/features/catalog/exam-card";
-import { SubjectCard } from "@/features/catalog/subject-card";
 import { exams, subjects } from "@/lib/data";
-import { createClient } from "@/lib/supabase/server";
+import { requireApprovedStudent } from "@/lib/student-access";
+import type { Subject } from "@/types/exam";
 
 export const dynamic = "force-dynamic";
 
+const streamSubjects = {
+  natural: ["english", "math", "biology", "chemistry", "physics"],
+  social: ["english", "math", "history", "economics", "geography"],
+} as const;
+
 export default async function ExamsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const fullName =
-    typeof user?.user_metadata.full_name === "string"
-      ? user.user_metadata.full_name
-      : undefined;
+  const access = await requireApprovedStudent();
+  const fullName = access.profile.fullName;
+  const firstName = fullName?.split(" ")[0];
+  const selectedSubjects = streamSubjects[access.profile.stream]
+    .map((id) => subjects.find((subject) => subject.id === id))
+    .filter((subject): subject is Subject => Boolean(subject));
+  const streamName =
+    access.profile.stream === "natural" ? "Natural Science" : "Social Science";
+  const StreamIcon =
+    access.profile.stream === "natural" ? FlaskConical : Network;
 
   return (
     <>
@@ -33,84 +43,98 @@ export default async function ExamsPage() {
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold text-primary">Student Portal</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold text-primary">Student Portal</p>
+              <Badge variant="secondary">
+                <StreamIcon className="mr-1 size-3" aria-hidden="true" />
+                {streamName}
+              </Badge>
+            </div>
             <h1 className="mt-2 text-4xl font-bold tracking-normal">
-              Welcome back{fullName ? `, ${fullName.split(" ")[0]}` : ""}.
+              Welcome back{firstName ? `, ${firstName}` : ""}.
             </h1>
             <p className="mt-3 text-muted-foreground">
-              Choose an exam, continue your preparation, and keep building your score.
+              Your study collection is organized around the {streamName} entrance
+              stream.
             </p>
           </div>
-          <PortalUserMenu
-            email={user?.email}
-            fullName={fullName}
-          />
+          <PortalUserMenu email={access.profile.email} fullName={fullName} />
         </div>
 
-        <section className="mb-8 rounded-lg border bg-card p-4" aria-label="Exam filters">
-          <div className="grid gap-3 md:grid-cols-[1fr_160px_180px_180px]">
-            <label className="relative block">
-              <span className="sr-only">Search exams</span>
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <Input className="pl-9" placeholder="Search subject, exam, or year" />
-            </label>
-            <Select defaultValue="12">
-              <SelectTrigger aria-label="Grade selector">
-                <SelectValue placeholder="Grade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="12">Grade 12</SelectItem>
-                <SelectItem value="11">Grade 11</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="all">
-              <SelectTrigger aria-label="Difficulty filter">
-                <SelectValue placeholder="Difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All difficulty</SelectItem>
-                <SelectItem value="easy">Easy</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="all-years">
-              <SelectTrigger aria-label="Exam year selector">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-years">All years</SelectItem>
-                <SelectItem value="2017">2017</SelectItem>
-                <SelectItem value="2016">2016</SelectItem>
-                <SelectItem value="2015">2015</SelectItem>
-                <SelectItem value="2014">2014</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </section>
-
         <section className="mb-12">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-normal">Available Exams</h2>
-            <p className="text-sm text-muted-foreground">{exams.length} exams</p>
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-secondary">
+                Your subject collection
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-normal">
+                Grade 12 {streamName}
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {selectedSubjects.length} subjects
+            </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {exams.map((exam) => (
-              <ExamCard key={exam.id} exam={exam} />
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {selectedSubjects.map((subject) => (
+              <SubjectCollectionCard key={subject.id} subject={subject} />
             ))}
           </div>
         </section>
 
-        <section>
-          <h2 className="mb-4 text-2xl font-bold tracking-normal">Subject Bank</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {subjects.map((subject) => (
-              <SubjectCard key={subject.id} subject={subject} />
+        <section className="border-t pt-10">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-accent-foreground">
+                <Trophy className="size-4 text-accent" aria-hidden="true" />
+                National Mock Championship
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-normal">
+                Full-stream exam simulations
+              </h2>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {exams.slice(0, 2).map((exam) => (
+              <ExamCard key={exam.id} exam={exam} />
             ))}
           </div>
         </section>
       </main>
       <Footer />
     </>
+  );
+}
+
+function SubjectCollectionCard({ subject }: { subject: Subject }) {
+  return (
+    <Card className="transition-colors hover:border-primary/40">
+      <CardContent className="p-5">
+        <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <BookOpenCheck className="size-5" aria-hidden="true" />
+        </span>
+        <h3 className="mt-5 text-xl font-semibold">{subject.name}</h3>
+        <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
+          {subject.description}
+        </p>
+        <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-semibold">
+          <span className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+            <FileText className="size-3.5 text-primary" aria-hidden="true" />
+            Summary notes
+          </span>
+          <span className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+            <BookOpenCheck className="size-3.5 text-secondary" aria-hidden="true" />
+            {subject.questionCount} questions
+          </span>
+        </div>
+        <Button asChild variant="outline" className="mt-5 w-full">
+          <Link href="/exam/demo-2015">
+            Open {subject.name}
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

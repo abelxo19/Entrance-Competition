@@ -2,7 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 
-const protectedPrefixes = ["/exams", "/exam", "/results"];
+const protectedPrefixes = [
+  "/onboarding",
+  "/payment",
+  "/exams",
+  "/exam",
+  "/results",
+];
 
 function isProtectedPath(pathname: string) {
   return protectedPrefixes.some(

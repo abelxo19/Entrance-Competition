@@ -15,7 +15,13 @@ const navItems = [
   { href: "/#pricing", label: "Pricing" },
 ];
 
-const portalPrefixes = ["/exams", "/exam", "/results"];
+const portalPrefixes = [
+  "/onboarding",
+  "/payment",
+  "/exams",
+  "/exam",
+  "/results",
+];
 
 export function NavbarClient({
   isAuthenticated,

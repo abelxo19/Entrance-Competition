@@ -37,11 +37,25 @@ export const subjects: Subject[] = [
     estimatedHours: 22,
   },
   {
-    id: "civics",
-    name: "Civics",
-    description: "Citizenship, governance, ethics, and constitutional literacy.",
-    questionCount: 220,
-    estimatedHours: 18,
+    id: "history",
+    name: "History",
+    description: "Ethiopian, African, and world history for entrance preparation.",
+    questionCount: 310,
+    estimatedHours: 26,
+  },
+  {
+    id: "economics",
+    name: "Economics",
+    description: "Microeconomics, macroeconomics, development, and key applications.",
+    questionCount: 290,
+    estimatedHours: 24,
+  },
+  {
+    id: "geography",
+    name: "Geography",
+    description: "Physical, human, Ethiopian, and environmental geography.",
+    questionCount: 300,
+    estimatedHours: 25,
   },
 ];
 
