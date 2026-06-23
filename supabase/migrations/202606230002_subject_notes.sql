@@ -30,8 +30,18 @@ create policy "Only admins can manage notes"
 on public.subject_notes for all
 to authenticated
 using (
-  (select raw_user_meta_data->>'role' from auth.users where auth.users.id = auth.uid()) = 'admin'
+  exists (
+    select 1
+    from public.profiles p
+    where p.user_id = auth.uid()
+      and p.role = 'admin'
+  )
 )
 with check (
-  (select raw_user_meta_data->>'role' from auth.users where auth.users.id = auth.uid()) = 'admin'
+  exists (
+    select 1
+    from public.profiles p
+    where p.user_id = auth.uid()
+      and p.role = 'admin'
+  )
 );

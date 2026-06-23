@@ -15,7 +15,14 @@ on storage.objects for insert
 to authenticated
 with check (
   bucket_id = 'subject-notes'
-  and (select raw_user_meta_data->>'role' from auth.users where auth.users.id = auth.uid()) = 'admin'
+  and (
+    exists (
+      select 1
+      from public.profiles p
+      where p.user_id = auth.uid()
+        and p.role = 'admin'
+    )
+  )
 );
 
 create policy "Admins can delete subject notes PDFs"
@@ -23,5 +30,12 @@ on storage.objects for delete
 to authenticated
 using (
   bucket_id = 'subject-notes'
-  and (select raw_user_meta_data->>'role' from auth.users where auth.users.id = auth.uid()) = 'admin'
+  and (
+    exists (
+      select 1
+      from public.profiles p
+      where p.user_id = auth.uid()
+        and p.role = 'admin'
+    )
+  )
 );
