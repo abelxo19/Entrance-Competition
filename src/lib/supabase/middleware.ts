@@ -8,6 +8,7 @@ const protectedPrefixes = [
   "/exams",
   "/exam",
   "/results",
+  "/admin",
 ];
 
 function isProtectedPath(pathname: string) {
