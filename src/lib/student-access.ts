@@ -20,6 +20,19 @@ export interface StudentAccess {
   };
 }
 
+function isRecoverableStudentAccessError(code?: string, message?: string) {
+  if (code === "PGRST116") {
+    return true;
+  }
+
+  if (!message) {
+    return false;
+  }
+
+  const normalized = message.toLowerCase();
+  return normalized.includes("relation") && normalized.includes("does not exist");
+}
+
 export async function getStudentAccess(): Promise<StudentAccess> {
   const supabase = await createClient();
   const {
@@ -35,15 +48,52 @@ export async function getStudentAccess(): Promise<StudentAccess> {
       .from("profiles")
       .select("email, full_name, stream")
       .eq("user_id", user.id)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("package_status")
       .select("plan, status, approved_at")
       .eq("user_id", user.id)
-      .single(),
+      .maybeSingle(),
   ]);
 
-  if (profileResult.error || packageResult.error) {
+  const profileErrorRecoverable = isRecoverableStudentAccessError(
+    profileResult.error?.code,
+    profileResult.error?.message,
+  );
+  const packageErrorRecoverable = isRecoverableStudentAccessError(
+    packageResult.error?.code,
+    packageResult.error?.message,
+  );
+
+  if (
+    (profileResult.error && !profileErrorRecoverable) ||
+    (packageResult.error && !packageErrorRecoverable)
+  ) {
+    throw new Error(
+      "Student access records are unavailable. Install the latest Supabase migration.",
+    );
+  }
+
+  const profile =
+    profileResult.data ??
+    (profileErrorRecoverable
+      ? {
+          email: user.email ?? "",
+          full_name: (user.user_metadata?.full_name as string | undefined) ?? null,
+          stream: null,
+        }
+      : null);
+  const pkg =
+    packageResult.data ??
+    (packageErrorRecoverable
+      ? {
+          plan: null,
+          status: "pending" as const,
+          approved_at: null,
+        }
+      : null);
+
+  if (!profile || !pkg) {
     throw new Error(
       "Student access records are unavailable. Install the latest Supabase migration.",
     );
@@ -52,14 +102,14 @@ export async function getStudentAccess(): Promise<StudentAccess> {
   return {
     user,
     profile: {
-      email: profileResult.data.email,
-      fullName: profileResult.data.full_name ?? undefined,
-      stream: profileResult.data.stream ?? undefined,
+      email: profile.email,
+      fullName: profile.full_name ?? undefined,
+      stream: profile.stream ?? undefined,
     },
     package: {
-      plan: packageResult.data.plan ?? undefined,
-      status: packageResult.data.status,
-      approvedAt: packageResult.data.approved_at ?? undefined,
+      plan: pkg.plan ?? undefined,
+      status: pkg.status,
+      approvedAt: pkg.approved_at ?? undefined,
     },
   };
 }
