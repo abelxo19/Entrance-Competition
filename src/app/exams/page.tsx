@@ -118,19 +118,13 @@ function SubjectCollectionCard({ subject }: { subject: Subject }) {
         <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
           {subject.description}
         </p>
-        <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-semibold">
-          <span className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-            <FileText className="size-3.5 text-primary" aria-hidden="true" />
-            Summary notes
-          </span>
-          <span className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-            <BookOpenCheck className="size-3.5 text-secondary" aria-hidden="true" />
-            {subject.questionCount} questions
-          </span>
+        <div className="mt-5 flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-xs font-semibold">
+          <FileText className="size-3.5 text-primary" aria-hidden="true" />
+          Summary notes
         </div>
         <Button asChild variant="outline" className="mt-5 w-full">
-          <Link href={`/subjects/${subject.id}`}>
-            View {subject.name} Notes
+          <Link href={`/subjects/${subject.id}/grade`}>
+            Open {subject.name}
             <ArrowRight aria-hidden="true" />
           </Link>
         </Button>

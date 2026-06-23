@@ -48,6 +48,7 @@ export interface SubjectResult {
 export interface SubjectNote {
   id: string;
   subject_id: string;
+  grade: number; // 9-12
   title: string;
   summary?: string;
   file_path: string; // Path in storage

@@ -2,13 +2,13 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
-import { AdminNoteUpload } from "@/components/subjects/admin-note-upload";
 import { Button } from "@/components/ui/button";
+import { GradeSelector } from "@/components/subjects/grade-selector";
 import { subjects } from "@/lib/data";
-import { requireAdmin } from "@/lib/student-access";
+import { requireApprovedStudent } from "@/lib/student-access";
 import type { Subject } from "@/types/exam";
 
-interface AdminSubjectPageProps {
+interface GradeSelectionPageProps {
   params: Promise<{
     subjectId: string;
   }>;
@@ -16,8 +16,8 @@ interface AdminSubjectPageProps {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminSubjectUploadPage({ params }: AdminSubjectPageProps) {
-  await requireAdmin();
+export default async function GradeSelectionPage({ params }: GradeSelectionPageProps) {
+  await requireApprovedStudent();
   const { subjectId } = await params;
 
   const subject = subjects.find((s) => s.id === subjectId) as Subject | undefined;
@@ -40,27 +40,21 @@ export default async function AdminSubjectUploadPage({ params }: AdminSubjectPag
     <>
       <Navbar />
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-        <Link href="/admin">
+        <Link href="/exams">
           <Button variant="ghost" size="sm" className="mb-6">
             <ArrowLeft className="mr-1 size-4" />
-            Back to admin
+            Back to subjects
           </Button>
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-normal">Upload Notes</h1>
+          <h1 className="text-3xl font-bold tracking-normal">{subject.name}</h1>
           <p className="mt-2 text-muted-foreground">
-            Upload study materials for <span className="font-semibold">{subject.name}</span>
-            {" "}(Select grade level below)
+            Choose a grade level to view study notes
           </p>
         </div>
 
-        <AdminNoteUpload
-          subjectId={subjectId}
-          onUploadSuccess={() => {
-            // Optional: redirect or show success
-          }}
-        />
+        <GradeSelector subjectId={subjectId} />
       </main>
       <Footer />
     </>

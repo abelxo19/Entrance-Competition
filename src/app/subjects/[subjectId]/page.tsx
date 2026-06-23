@@ -14,11 +14,20 @@ interface SubjectNotesPageProps {
   params: Promise<{
     subjectId: string;
   }>;
+  searchParams: Promise<{
+    grade?: string;
+  }>;
 }
 
 export const dynamic = "force-dynamic";
 
-async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
+async function SubjectNotesContent({
+  subjectId,
+  grade,
+}: {
+  subjectId: string;
+  grade: number;
+}) {
   const subject = subjects.find((s) => s.id === subjectId) as Subject | undefined;
 
   if (!subject) {
@@ -29,17 +38,17 @@ async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
     );
   }
 
-  const notes = await getSubjectNotes(subjectId);
+  const notes = await getSubjectNotes(subjectId, grade);
 
   return (
     <>
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-3xl">
-          <Link href="/exams">
+          <Link href={`/subjects/${subjectId}/grade`}>
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="mr-1 size-4" />
-              Back to subjects
+              Back to grade selection
             </Button>
           </Link>
           <div className="flex items-center gap-3">
@@ -48,12 +57,12 @@ async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
             </div>
             <div>
               <p className="text-sm font-semibold text-primary">{subject.name}</p>
-              <h1 className="mt-1 text-3xl font-bold tracking-normal">Study Notes</h1>
+              <h1 className="mt-1 text-3xl font-bold tracking-normal">Grade {grade}</h1>
             </div>
           </div>
           <p className="mt-4 text-muted-foreground">
             {notes.length === 0
-              ? "No study notes available yet for this subject."
+              ? "No study notes available yet for this subject and grade."
               : `${notes.length} study ${notes.length === 1 ? "note" : "notes"} available`}
           </p>
         </div>
@@ -64,7 +73,7 @@ async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
         <div className="rounded-lg border border-dashed bg-muted/30 p-8 text-center">
           <FileText className="mx-auto mb-3 size-8 text-muted-foreground" />
           <p className="text-muted-foreground">
-            No study notes available for {subject.name} yet.
+            No study notes available for {subject.name} Grade {grade} yet.
           </p>
           <p className="text-xs text-muted-foreground">
             Check back soon for curated study materials.
@@ -73,7 +82,10 @@ async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {notes.map((note) => (
-            <Link key={note.id} href={`/subjects/${subjectId}/notes/${note.id}`}>
+            <Link
+              key={note.id}
+              href={`/subjects/${subjectId}/notes/${note.id}`}
+            >
               <Card className="h-full transition-all hover:border-primary/40 hover:shadow-md">
                 <CardContent className="p-5">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-secondary/10 text-secondary">
@@ -99,9 +111,35 @@ async function SubjectNotesContent({ subjectId }: { subjectId: string }) {
   );
 }
 
-export default async function SubjectNotesPage({ params }: SubjectNotesPageProps) {
+export default async function SubjectNotesPage({
+  params,
+  searchParams,
+}: SubjectNotesPageProps) {
   await requireApprovedStudent();
   const { subjectId } = await params;
+  const { grade } = await searchParams;
+
+  const gradeNum = grade ? parseInt(grade) : null;
+
+  if (!gradeNum || gradeNum < 9 || gradeNum > 12) {
+    return (
+      <>
+        <Navbar />
+        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <Link href={`/subjects/${subjectId}/grade`}>
+            <Button variant="ghost" size="sm" className="mb-6">
+              <ArrowLeft className="mr-1 size-4" />
+              Select a valid grade
+            </Button>
+          </Link>
+          <div className="rounded-lg border bg-card p-8 text-center">
+            <p className="text-destructive">Invalid grade. Please select 9-12.</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -114,7 +152,7 @@ export default async function SubjectNotesPage({ params }: SubjectNotesPageProps
             </div>
           }
         >
-          <SubjectNotesContent subjectId={subjectId} />
+          <SubjectNotesContent subjectId={subjectId} grade={gradeNum} />
         </Suspense>
       </main>
       <Footer />

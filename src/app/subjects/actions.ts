@@ -5,15 +5,16 @@ import { createClient } from "@/lib/supabase/server";
 import type { SubjectNote } from "@/types/exam";
 
 /**
- * Fetch all notes for a specific subject, ordered by display order
+ * Fetch all notes for a specific subject and grade, ordered by display order
  */
-export async function getSubjectNotes(subjectId: string): Promise<SubjectNote[]> {
+export async function getSubjectNotes(subjectId: string, grade: number): Promise<SubjectNote[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("subject_notes")
     .select("*")
     .eq("subject_id", subjectId)
+    .eq("grade", grade)
     .order("order_by", { ascending: true })
     .order("created_at", { ascending: false });
 
@@ -73,12 +74,17 @@ export async function uploadNotePdf(
   const supabase = await createClient();
   const file = formData.get("file") as File;
   const subjectId = formData.get("subjectId") as string;
+  const grade = parseInt(formData.get("grade") as string);
   const title = formData.get("title") as string;
   const summary = formData.get("summary") as string;
 
   // Validate inputs
-  if (!file || !subjectId || !title) {
+  if (!file || !subjectId || !title || !grade) {
     return { success: false, error: "Missing required fields" };
+  }
+
+  if (grade < 9 || grade > 12) {
+    return { success: false, error: "Grade must be between 9 and 12" };
   }
 
   if (!file.type.includes("pdf")) {
@@ -106,7 +112,7 @@ export async function uploadNotePdf(
 
   // Upload file to storage
   const fileName = `${Date.now()}_${file.name}`;
-  const filePath = `subjects/${subjectId}/${fileName}`;
+  const filePath = `subjects/${subjectId}/${grade}/${fileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("subject-notes")
@@ -122,6 +128,7 @@ export async function uploadNotePdf(
     .from("subject_notes")
     .insert({
       subject_id: subjectId,
+      grade,
       title,
       summary,
       file_path: filePath,

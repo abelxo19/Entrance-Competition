@@ -4,6 +4,13 @@ import { FileUp, Loader, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { uploadNotePdf } from "@/app/subjects/actions";
 
 interface AdminNoteUploadProps {
@@ -15,6 +22,7 @@ interface AdminNoteUploadProps {
 export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNoteUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [grade, setGrade] = useState<string>("12");
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +43,7 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file || !title) {
+    if (!file || !title || !grade) {
       setError("Please fill in all required fields");
       return;
     }
@@ -46,6 +54,7 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
     const formData = new FormData();
     formData.append("file", file);
     formData.append("subjectId", subjectId);
+    formData.append("grade", grade);
     formData.append("title", title);
     formData.append("summary", summary);
 
@@ -56,6 +65,7 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
       setFile(null);
       setTitle("");
       setSummary("");
+      setGrade("12");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -86,6 +96,22 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Grade */}
+        <div>
+          <label className="block text-sm font-medium">Grade Level *</label>
+          <Select value={grade} onValueChange={setGrade}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="9">Grade 9</SelectItem>
+              <SelectItem value="10">Grade 10</SelectItem>
+              <SelectItem value="11">Grade 11</SelectItem>
+              <SelectItem value="12">Grade 12</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Title */}
         <div>
           <label className="block text-sm font-medium">Note Title *</label>
@@ -175,7 +201,7 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={isLoading || !file || !title}
+          disabled={isLoading || !file || !title || !grade}
           className="w-full"
         >
           {isLoading ? (

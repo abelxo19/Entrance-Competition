@@ -2,9 +2,10 @@
 create table public.subject_notes (
   id uuid default gen_random_uuid() primary key,
   subject_id text not null,
+  grade integer not null check (grade >= 9 and grade <= 12), -- Grade 9-12
   title text not null,
   summary text, -- Brief description
-  file_path text not null, -- Path in storage: subjects/{subject_id}/{filename}
+  file_path text not null, -- Path in storage: subjects/{subject_id}/{grade}/{filename}
   file_size integer, -- Size in bytes
   order_by integer default 0, -- Display order
   created_at timestamptz not null default now(),
@@ -12,7 +13,7 @@ create table public.subject_notes (
 );
 
 -- Add indexes for faster queries
-create index subject_notes_subject_id_idx on public.subject_notes(subject_id);
+create index subject_notes_subject_grade_idx on public.subject_notes(subject_id, grade);
 create index subject_notes_created_at_idx on public.subject_notes(created_at desc);
 
 -- Enable RLS
