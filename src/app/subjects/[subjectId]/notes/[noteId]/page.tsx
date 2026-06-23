@@ -40,7 +40,7 @@ async function NoteViewerContent({ subjectId, noteId }: { subjectId: string; not
 
   return (
     <>
-      <Link href={`/subjects/${subjectId}`}>
+      <Link href={`/subjects/${subjectId}/notes?grade=${note.grade}`}>
         <Button variant="ghost" size="sm" className="mb-6">
           <ArrowLeft className="mr-1 size-4" />
           Back to notes
