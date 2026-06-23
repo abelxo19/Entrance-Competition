@@ -1,5 +1,4 @@
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { getAdminStudents } from "@/app/admin/actions";
 import { requireAdmin } from "@/lib/student-access";
@@ -18,12 +17,10 @@ export default async function AdminPage() {
   };
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <AdminDashboard students={students} stats={stats} />
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }

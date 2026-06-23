@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PortalUserMenu } from "@/components/auth/portal-user-menu";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,8 +37,7 @@ export default async function ExamsPage() {
     access.profile.stream === "natural" ? FlaskConical : Network;
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-3xl">
@@ -102,8 +100,7 @@ export default async function ExamsPage() {
           </div>
         </section>
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }
 

@@ -11,8 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { HeroSection } from "@/components/sections/hero-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,8 +63,7 @@ const tracks = [
 
 export default function Home() {
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <HeroSection />
       <main>
         <section id="vault" className="border-b bg-background scroll-mt-20">
@@ -235,8 +233,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }
 

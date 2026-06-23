@@ -1,8 +1,7 @@
 import { ArrowLeft, Loader } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { PdfViewer } from "@/components/subjects/pdf-viewer";
 import { getNotePdfUrl, getSubjectNote } from "@/app/subjects/actions";
@@ -57,8 +56,7 @@ export default async function NoteViewerPage({ params }: NoteViewerPageProps) {
   const { subjectId, noteId } = await params;
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Suspense
           fallback={
@@ -73,7 +71,6 @@ export default async function NoteViewerPage({ params }: NoteViewerPageProps) {
           <NoteViewerContent subjectId={subjectId} noteId={noteId} />
         </Suspense>
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }

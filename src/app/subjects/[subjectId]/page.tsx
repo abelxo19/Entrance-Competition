@@ -1,8 +1,7 @@
 import { ArrowLeft, BookOpen, FileText } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSubjectNotes } from "@/app/subjects/actions";
@@ -123,8 +122,7 @@ export default async function SubjectNotesPage({
 
   if (!gradeNum || gradeNum < 9 || gradeNum > 12) {
     return (
-      <>
-        <Navbar />
+      <SiteShell>
         <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <Link href={`/subjects/${subjectId}/grade`}>
             <Button variant="ghost" size="sm" className="mb-6">
@@ -136,14 +134,12 @@ export default async function SubjectNotesPage({
             <p className="text-destructive">Invalid grade. Please select 9-12.</p>
           </div>
         </main>
-        <Footer />
-      </>
+      </SiteShell>
     );
   }
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Suspense
           fallback={
@@ -155,7 +151,6 @@ export default async function SubjectNotesPage({
           <SubjectNotesContent subjectId={subjectId} grade={gradeNum} />
         </Suspense>
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }

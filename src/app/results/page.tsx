@@ -1,7 +1,6 @@
 import { Award, RotateCcw, Target, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PerformanceCard } from "@/features/results/performance-card";
@@ -18,8 +17,7 @@ export default async function ResultsPage() {
   const percent = Math.round((totalScore / totalPossible) * 100);
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <section className="mb-8 rounded-lg border bg-card p-6">
           <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-center">
@@ -87,7 +85,6 @@ export default async function ResultsPage() {
           </div>
         </section>
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }

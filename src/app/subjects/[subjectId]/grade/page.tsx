@@ -1,7 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { GradeSelector } from "@/components/subjects/grade-selector";
 import { subjects } from "@/lib/data";
@@ -24,21 +23,18 @@ export default async function GradeSelectionPage({ params }: GradeSelectionPageP
 
   if (!subject) {
     return (
-      <>
-        <Navbar />
+      <SiteShell>
         <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="rounded-lg border bg-card p-8 text-center">
             <p className="text-muted-foreground">Subject not found</p>
           </div>
         </main>
-        <Footer />
-      </>
+      </SiteShell>
     );
   }
 
   return (
-    <>
-      <Navbar />
+    <SiteShell>
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
         <Link href="/exams">
           <Button variant="ghost" size="sm" className="mb-6">
@@ -56,7 +52,6 @@ export default async function GradeSelectionPage({ params }: GradeSelectionPageP
 
         <GradeSelector subjectId={subjectId} />
       </main>
-      <Footer />
-    </>
+    </SiteShell>
   );
 }
