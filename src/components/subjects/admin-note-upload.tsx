@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUp, Loader, X } from "lucide-react";
+import { FileUp, Loader } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,11 +15,9 @@ import { uploadNotePdf } from "@/app/subjects/actions";
 
 interface AdminNoteUploadProps {
   subjectId: string;
-  onUploadSuccess?: (noteId: string) => void;
-  onClose?: () => void;
 }
 
-export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNoteUploadProps) {
+export function AdminNoteUpload({ subjectId }: AdminNoteUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [grade, setGrade] = useState<string>("12");
@@ -69,10 +67,8 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      onUploadSuccess?.(result.noteId!);
       setTimeout(() => {
         setSuccess(false);
-        onClose?.();
       }, 2000);
     } else {
       setError(result.error || "Failed to upload note");
@@ -83,16 +79,8 @@ export function AdminNoteUpload({ subjectId, onUploadSuccess, onClose }: AdminNo
 
   return (
     <div className="rounded-lg border bg-card p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4">
         <h3 className="text-lg font-semibold">Upload Subject Note</h3>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="size-5" />
-          </button>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

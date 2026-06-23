@@ -55,12 +55,7 @@ export default async function AdminSubjectUploadPage({ params }: AdminSubjectPag
           </p>
         </div>
 
-        <AdminNoteUpload
-          subjectId={subjectId}
-          onUploadSuccess={() => {
-            // Optional: redirect or show success
-          }}
-        />
+        <AdminNoteUpload subjectId={subjectId} />
       </main>
       <Footer />
     </>
