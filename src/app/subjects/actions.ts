@@ -99,21 +99,25 @@ export async function uploadNotePdf(
     return { success: false, error: "Unauthorized" };
   }
 
-  // Check if user is admin
-  const { data: userData, error: profileError } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", user.id)
-    .single();
+  // Check if user is admin using role from user metadata or database
+  const userRole = user.user_metadata?.role as string | undefined;
+  
+  if (userRole !== "admin") {
+    // If not in metadata, check database (but this may fail due to RLS)
+    const { data: userData, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
 
-  if (profileError) {
-    console.error("Profile lookup error:", profileError);
-    return { success: false, error: "Could not verify admin status" };
-  }
-
-  if (userData?.role !== "admin") {
-    console.error("User is not admin:", { userId: user.id, role: userData?.role });
-    return { success: false, error: "Only admins can upload notes" };
+    if (profileError || userData?.role !== "admin") {
+      console.error("User is not admin:", { 
+        userId: user.id, 
+        metadataRole: userRole,
+        profileError 
+      });
+      return { success: false, error: "Only admins can upload notes" };
+    }
   }
 
   // Upload file to storage
