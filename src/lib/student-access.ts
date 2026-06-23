@@ -69,14 +69,30 @@ export async function getStudentAccess(): Promise<StudentAccess> {
     (profileResult.error && !profileErrorRecoverable) ||
     (packageResult.error && !packageErrorRecoverable)
   ) {
-    throw new Error(
-      "Student access records are unavailable. Install the latest Supabase migration.",
-    );
+    console.error("Student access lookup failed", {
+      userId: user.id,
+      profileError: profileResult.error
+        ? {
+            code: profileResult.error.code,
+            message: profileResult.error.message,
+            details: profileResult.error.details,
+            hint: profileResult.error.hint,
+          }
+        : null,
+      packageError: packageResult.error
+        ? {
+            code: packageResult.error.code,
+            message: packageResult.error.message,
+            details: packageResult.error.details,
+            hint: packageResult.error.hint,
+          }
+        : null,
+    });
   }
 
   const profile =
     profileResult.data ??
-    (profileErrorRecoverable
+    ((profileErrorRecoverable || Boolean(profileResult.error))
       ? {
           email: user.email ?? "",
           full_name: (user.user_metadata?.full_name as string | undefined) ?? null,
@@ -85,7 +101,7 @@ export async function getStudentAccess(): Promise<StudentAccess> {
       : null);
   const pkg =
     packageResult.data ??
-    (packageErrorRecoverable
+    ((packageErrorRecoverable || Boolean(packageResult.error))
       ? {
           plan: null,
           status: "pending" as const,
@@ -93,23 +109,17 @@ export async function getStudentAccess(): Promise<StudentAccess> {
         }
       : null);
 
-  if (!profile || !pkg) {
-    throw new Error(
-      "Student access records are unavailable. Install the latest Supabase migration.",
-    );
-  }
-
   return {
     user,
     profile: {
-      email: profile.email,
-      fullName: profile.full_name ?? undefined,
-      stream: profile.stream ?? undefined,
+      email: profile?.email ?? user.email ?? "",
+      fullName: profile?.full_name ?? undefined,
+      stream: profile?.stream ?? undefined,
     },
     package: {
-      plan: pkg.plan ?? undefined,
-      status: pkg.status,
-      approvedAt: pkg.approved_at ?? undefined,
+      plan: pkg?.plan ?? undefined,
+      status: pkg?.status ?? "pending",
+      approvedAt: pkg?.approved_at ?? undefined,
     },
   };
 }
