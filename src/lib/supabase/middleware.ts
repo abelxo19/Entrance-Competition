@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ensureCurrentDeviceSession } from "@/lib/device-sessions";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 
 const protectedPrefixes = [
@@ -53,6 +54,24 @@ export async function updateSession(request: NextRequest) {
 
   const { data: claimsData } = await supabase.auth.getClaims();
   const isAuthenticated = Boolean(claimsData?.claims);
+
+  if (isAuthenticated) {
+    const deviceSession = await ensureCurrentDeviceSession(
+      supabase,
+      request.headers.get("user-agent"),
+    );
+
+    if (!deviceSession.ok) {
+      await supabase.auth.signOut();
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/auth/login";
+      loginUrl.searchParams.set("error", deviceSession.error);
+      if (isProtectedPath(pathname)) {
+        loginUrl.searchParams.set("next", pathname);
+      }
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   if (!isAuthenticated && isProtectedPath(pathname)) {
     const loginUrl = request.nextUrl.clone();
