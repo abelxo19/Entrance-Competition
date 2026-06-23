@@ -100,13 +100,19 @@ export async function uploadNotePdf(
   }
 
   // Check if user is admin
-  const { data: userData } = await supabase
+  const { data: userData, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("user_id", user.id)
     .single();
 
+  if (profileError) {
+    console.error("Profile lookup error:", profileError);
+    return { success: false, error: "Could not verify admin status" };
+  }
+
   if (userData?.role !== "admin") {
+    console.error("User is not admin:", { userId: user.id, role: userData?.role });
     return { success: false, error: "Only admins can upload notes" };
   }
 
@@ -119,8 +125,17 @@ export async function uploadNotePdf(
     .upload(filePath, file);
 
   if (uploadError) {
-    console.error("Upload error:", uploadError);
-    return { success: false, error: "Failed to upload file" };
+    console.error("Upload error details:", {
+      message: uploadError.message,
+      statusCode: uploadError.statusCode,
+      error: uploadError,
+      filePath,
+      fileName,
+    });
+    return { 
+      success: false, 
+      error: `Failed to upload file: ${uploadError.message}` 
+    };
   }
 
   // Create note record in database
@@ -139,9 +154,13 @@ export async function uploadNotePdf(
     .single();
 
   if (dbError) {
-    console.error("Database error:", dbError);
+    console.error("Database error:", {
+      message: dbError.message,
+      code: dbError.code,
+      error: dbError,
+    });
     // TODO: Clean up uploaded file if DB insert fails
-    return { success: false, error: "Failed to save note metadata" };
+    return { success: false, error: `Failed to save note: ${dbError.message}` };
   }
 
   return { success: true, noteId: note.id };
