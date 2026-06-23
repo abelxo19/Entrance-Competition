@@ -1,12 +1,15 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 
 // Set worker for PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
 
 interface PdfViewerProps {
   pdfUrl: string;
@@ -18,14 +21,31 @@ export function PdfViewer({ pdfUrl, title }: PdfViewerProps) {
   const [pageNumber, setPageNumber] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [useIframeFallback, setUseIframeFallback] = useState(false);
+  const [pageWidth, setPageWidth] = useState(700);
+
+  useEffect(() => {
+    const updatePageWidth = () => {
+      setPageWidth(Math.min(window.innerWidth - 48, 700));
+    };
+
+    updatePageWidth();
+    window.addEventListener("resize", updatePageWidth);
+    return () => window.removeEventListener("resize", updatePageWidth);
+  }, []);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
     setIsLoading(false);
   }
 
-  function onDocumentLoadError() {
+  function onDocumentLoadError(loadError: Error) {
+    console.error("PDF viewer failed to load document", {
+      message: loadError.message,
+      pdfUrl,
+    });
     setError("Failed to load PDF");
+    setUseIframeFallback(true);
     setIsLoading(false);
   }
 
@@ -60,7 +80,7 @@ export function PdfViewer({ pdfUrl, title }: PdfViewerProps) {
           </div>
         )}
 
-        {error && (
+        {error && !useIframeFallback && (
           <div className="flex h-96 items-center justify-center">
             <div className="text-center">
               <p className="text-sm font-semibold text-destructive">{error}</p>
@@ -69,7 +89,16 @@ export function PdfViewer({ pdfUrl, title }: PdfViewerProps) {
           </div>
         )}
 
-        {!error && (
+        {useIframeFallback && (
+          <iframe
+            src={pdfUrl}
+            title={title}
+            className="h-[70vh] w-full rounded border"
+            loading="lazy"
+          />
+        )}
+
+        {!error && !useIframeFallback && (
           <Document
             file={pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -79,7 +108,7 @@ export function PdfViewer({ pdfUrl, title }: PdfViewerProps) {
             <div className="flex justify-center">
               <Page
                 pageNumber={pageNumber}
-                width={Math.min(window.innerWidth - 48, 700)}
+                width={pageWidth}
               />
             </div>
           </Document>
