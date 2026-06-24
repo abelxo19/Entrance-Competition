@@ -50,7 +50,11 @@ export default async function PaymentPage() {
                 to our Telegram account for manual approval.
               </p>
             </div>
-            <PortalUserMenu email={access.profile.email} fullName={fullName} />
+            <PortalUserMenu
+              email={access.profile.email}
+              fullName={fullName}
+              isAdmin={access.profile.role === "admin"}
+            />
           </div>
 
           <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">

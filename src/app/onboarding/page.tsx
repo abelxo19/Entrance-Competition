@@ -105,7 +105,11 @@ export default async function OnboardingPage({
                   : "Your answer personalizes the subjects, resources, and exams shown in your portal."}
               </p>
             </div>
-                <PortalUserMenu email={access.profile.email} fullName={fullName} />
+                <PortalUserMenu
+                  email={access.profile.email}
+                  fullName={fullName}
+                  isAdmin={access.profile.role === "admin"}
+                />
           </div>
 
           {params.error ? (

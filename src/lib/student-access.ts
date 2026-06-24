@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export type StudentStream = "natural" | "social";
 export type StudentPlan = "individual" | "squad";
 export type PaymentStatus = "pending" | "approved" | "rejected";
+export type UserRole = "student" | "admin";
 
 export interface StudentAccess {
   user: User;
@@ -12,6 +13,7 @@ export interface StudentAccess {
     fullName?: string;
     email: string;
     stream?: StudentStream;
+    role: UserRole;
   };
   package: {
     plan?: StudentPlan;
@@ -46,7 +48,7 @@ export async function getStudentAccess(): Promise<StudentAccess> {
   const [profileResult, packageResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("email, full_name, stream")
+      .select("email, full_name, stream, role")
       .eq("user_id", user.id)
       .maybeSingle(),
     supabase
@@ -97,6 +99,7 @@ export async function getStudentAccess(): Promise<StudentAccess> {
           email: user.email ?? "",
           full_name: (user.user_metadata?.full_name as string | undefined) ?? null,
           stream: null,
+          role: "student" as const,
         }
       : null);
   const pkg =
@@ -115,6 +118,7 @@ export async function getStudentAccess(): Promise<StudentAccess> {
       email: profile?.email ?? user.email ?? "",
       fullName: profile?.full_name ?? undefined,
       stream: profile?.stream ?? undefined,
+      role: profile?.role === "admin" ? "admin" : "student",
     },
     package: {
       plan: pkg?.plan ?? undefined,

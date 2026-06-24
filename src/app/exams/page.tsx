@@ -56,7 +56,11 @@ export default async function ExamsPage() {
               stream.
             </p>
           </div>
-          <PortalUserMenu email={access.profile.email} fullName={fullName} />
+          <PortalUserMenu
+            email={access.profile.email}
+            fullName={fullName}
+            isAdmin={access.profile.role === "admin"}
+          />
         </div>
 
         <section className="mb-12">

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Menu } from "lucide-react";
+import { ArrowRight, Menu, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -21,12 +21,15 @@ const portalPrefixes = [
   "/exams",
   "/exam",
   "/results",
+  "/admin",
 ];
 
 export function NavbarClient({
   isAuthenticated,
+  isAdmin = false,
 }: {
   isAuthenticated: boolean;
+  isAdmin?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
@@ -58,6 +61,14 @@ export function NavbarClient({
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            {isAdmin ? (
+              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+                <Link href="/admin">
+                  <ShieldCheck className="size-4" aria-hidden="true" />
+                  Admin
+                </Link>
+              </Button>
+            ) : null}
             {showPortalAction ? (
               <Button asChild size="sm" className="hidden sm:inline-flex">
                 <Link href={portalHref}>
@@ -92,6 +103,14 @@ export function NavbarClient({
                 {item.label}
               </Link>
             ))}
+            {isAdmin ? (
+              <Button asChild variant="outline" className="mt-2 w-full">
+                <Link href="/admin" onClick={() => setIsOpen(false)}>
+                  <ShieldCheck className="size-4" aria-hidden="true" />
+                  Admin
+                </Link>
+              </Button>
+            ) : null}
             {showPortalAction ? (
               <Button asChild className="mt-2 w-full">
                 <Link href={portalHref} onClick={() => setIsOpen(false)}>
